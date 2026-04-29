@@ -17,6 +17,18 @@
             height: 100vh;
             overflow: hidden;
             flex-direction: column;
+            transition: background 0.1s;
+        }
+
+        /* Flashing effect for the prank screen */
+        .alarm-bg {
+            animation: flash-red 0.5s infinite;
+        }
+
+        @keyframes flash-red {
+            0% { background-color: #000; }
+            50% { background-color: #200; }
+            100% { background-color: #000; }
         }
 
         #overlay {
@@ -24,6 +36,7 @@
             cursor: pointer;
             padding: 50px;
             border: 2px dashed #ff0000;
+            background: rgba(255, 0, 0, 0.05);
         }
 
         #main-prank {
@@ -33,7 +46,7 @@
         }
 
         .glitch {
-            font-size: 5vw;
+            font-size: 8vw;
             font-weight: bold;
             text-transform: uppercase;
             position: relative;
@@ -51,22 +64,27 @@
         }
 
         .leak-status {
-            font-size: 20px;
+            font-size: 24px;
             color: #fff;
             margin-top: 20px;
-            background: #330000;
-            padding: 10px;
+            background: #ff0000;
+            padding: 10px 20px;
             display: inline-block;
+            font-weight: bold;
         }
 
         #log-container {
             text-align: left;
             margin: 20px auto;
-            max-width: 600px;
+            max-width: 80%;
+            width: 500px;
             color: #00ff00;
             font-size: 14px;
             height: 150px;
-            overflow: hidden;
+            overflow-y: hidden; /* JavaScript will handle scrolling */
+            border: 1px solid #333;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
         }
 
         .btn {
@@ -78,6 +96,8 @@
             cursor: pointer;
             border-radius: 10px;
             font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 0 15px rgba(255,0,0,0.5);
         }
     </style>
 </head>
@@ -86,7 +106,7 @@
     <!-- Starting Screen -->
     <div id="overlay" onclick="startPrank()">
         <h1 style="color: white;">CRITICAL SYSTEM UPDATE</h1>
-        <p style="color: #ccc;">Your device needs a security patch.</p>
+        <p style="color: #ccc;">Your device needs a security patch (v4.0.2).</p>
         <button class="btn">START SCAN NOW</button>
     </div>
 
@@ -97,30 +117,34 @@
         
         <div class="leak-status" id="counter">Data Leaked: 0%</div>
         
-        <div id="log-container"></div>
+        <div id="log-container" id="logs"></div>
     </div>
 
     <!-- Music / Sound Effect -->
-    <!-- Maine ek Siren music link add kiya hai -->
     <audio id="siren-sound" loop>
         <source src="https://www.soundjay.com/misc/sounds/ambulance-siren-01.mp3" type="audio/mpeg">
     </audio>
 
     <script>
         function startPrank() {
-            // Full screen mode
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
+            // Full screen mode with cross-browser support
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
             }
 
-            // Hide start screen, show prank
+            // UI Changes
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('main-prank').style.display = 'block';
-            document.body.style.backgroundColor = "black";
+            document.body.classList.add('alarm-bg');
 
-            // Play music
+            // Play sound logic
             let audio = document.getElementById('siren-sound');
-            audio.play();
+            audio.play().catch(e => console.log("Audio play blocked by browser"));
 
             // Counter logic
             let count = 0;
@@ -128,21 +152,27 @@
             let counterInterval = setInterval(() => {
                 count++;
                 counterElement.innerText = "Data Leaked: " + count + "%";
-                if (count >= 100) clearInterval(counterInterval);
-            }, 100);
+                if (count >= 100) {
+                    clearInterval(counterInterval);
+                    finishPrank();
+                }
+            }, 150);
 
             // Fake Log Lines
             const logs = [
                 "Establishing connection to dark_web_666...",
-                "Bypassing Google Encryption...",
-                "Accessing Private Photos...",
+                "Bypassing Firewall...",
+                "IP Address: 192.168.1.104 Detected",
+                "Accessing Private Gallery...",
                 "Downloading WhatsApp Databases...",
+                "Extracting Contacts...",
                 "Extracting Bank Credentials...",
-                "Sending IP 102.16.8.1 to Remote Server...",
-                "Contact List Copied...",
-                "Warning: Security Shield Disabled!",
-                "Deleting System Root Files...",
-                "Remote Control Access: GRANTED"
+                "Warning: System Security Disabled!",
+                "Sending Data to Remote Server [UK]...",
+                "Deleting System32 Files...",
+                "Root Access: GRANTED",
+                "Encrypting Hard Drive...",
+                "Prank Status: 100% Successful"
             ];
 
             let logContainer = document.getElementById('log-container');
@@ -153,12 +183,22 @@
                     p.innerHTML = "> " + logs[i];
                     p.style.margin = "5px 0";
                     logContainer.appendChild(p);
+                    
+                    // Auto scroll to bottom
+                    logContainer.scrollTop = logContainer.scrollHeight;
                     i++;
                 } else {
                     clearInterval(logInterval);
                 }
-            }, 700);
+            }, 800);
+        }
+
+        function finishPrank() {
+            setTimeout(() => {
+                alert("YOU GOT PRANKED! 😂\n\nDon't worry, nothing happened to your device.");
+                location.reload(); // Reset the page
+            }, 1000);
         }
     </script>
 </body>
-</html>
+    </html>
